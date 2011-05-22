@@ -1,0 +1,61 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+
+
+  <body>
+    <div metal:define-macro="portlet" tal:omit-tag="">
+
+<tal:comment replace="nothing">
+
+    <!--- XXX Fix me -->
+
+         tal:condition="python: (here.portlet_dynamic.anon_see and isAnon) or (here.portlet_dynamic.auth_see and not isAnon)"
+
+</tal:comment>
+
+      <div class="portlet" id="portlet_hotlinks"
+           tal:define="current_page_obj python: container.getCurrentPageObj()">
+
+
+    <div class="portletHeader">
+        <a tal:content="python: str(current_page_obj['title'])">Dynamic Name</a>
+    </div>
+
+
+        <div class="portletBody">
+          <div class="portletContent odd">
+
+            <ul tal:condition="python: current_page_obj.id != 'coopcoffees'">
+             <li tal:repeat="sublink python: [x for x in container.getContents(current_page_obj) if str(x[1]).strip()]">
+               <img src="bean_bullet.gif" />
+                <a tal:attributes="href python: '/' + current_page_obj.id + '/' + str(sublink[0])">
+                    <span class="" tal:content="python: str(sublink[1])">Web Links</span>
+                </a>
+              </li>  
+            </ul>
+
+                      
+
+            <ul tal:condition="python: current_page_obj.id == 'coopcoffees'">
+                <li tal:repeat="tab portal_tabs">
+                   <img src="bean_bullet.gif" />
+                    <a href="" 
+                       tal:content="tab/name"
+                       tal:attributes="href tab/url;
+                                       title tab/description|nothing">
+                    <span class="">Tab Name</span>
+                    </a>
+                </li>  
+            </ul>
+
+          </div>
+        </div>
+
+    </div>
+  
+    </div>  
+  </body>
+
+</html>
+

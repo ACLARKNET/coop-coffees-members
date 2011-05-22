@@ -1,0 +1,12 @@
+<div metal:define-macro="portal_logo" style="background-image: url(cc-banner.png);
+    background-repeat: no-repeat;background-position: 175px 17px">
+
+<a id="portal-logo"
+   accesskey="1"
+   tal:attributes="href view/navigation_root_url"
+   i18n:domain="plone">
+    <img src="cc-logo.png" alt=""
+         tal:replace="structure view/logo_tag" /></a>
+
+
+</div>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<object>
+ <order manager="plone.portalfooter" skinname="Coop Coffees Theme">
+  <viewlet name="plone.colophon"/>
+  <viewlet name="plone.footer"/>
+  <viewlet name="plone.analytics"/>
+ </order>
+ <hidden manager="plone.portalheader" skinname="Coop Coffees Theme">
+  <viewlet name="plone.site_actions"/>
+  <viewlet name="plone.searchbox"/>
+ </hidden>
+ <hidden manager="plone.portaltop" skinname="Coop Coffees Theme">
+  <viewlet name="plone.path_bar" remove="True"/>
+ </hidden>
+</object>

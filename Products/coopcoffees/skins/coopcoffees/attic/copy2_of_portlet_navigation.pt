@@ -1,0 +1,40 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+<body>
+<div metal:define-macro="portlet"
+       i18n:domain="plone"
+       tal:omit-tag=""
+       tal:define="data python:here.plone_utils.createNavTree(here, sitemap=None);"
+       tal:condition="python: (here.portlet_navigation.anon_see and isAnon) or (here.portlet_navigation.auth_see and not isAnon)">
+       
+    <dt class="portletHeader">
+        <a href="#" tal:attributes="href string:$portal_url/sitemap" i18n:translate="box_navigation">Navigation</a>
+    </dt>
+
+    <div tal:define="selected_tabs python:here.selectedTabs('index_html', here, portal_tabs);
+                     selected_portal_tab selected_tabs/portal;"
+         tal:condition="portal_tabs">  
+     <div class="portlet" id="portlet_navigation">
+        <div class="portletBody">
+          <div class="portletContent odd">
+
+            <ul>
+                <li tal:repeat="tab portal_tabs">
+                    <a href="" 
+                       tal:content="tab/name"
+                       tal:attributes="href tab/url;
+                                       title tab/description|nothing">
+                    <span class="">Tab Name</span>
+                    </a>
+                </li>
+            </ul>
+          </div>
+
+        </div>
+     </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xml:lang="en" lang="en"
+      i18n:domain="plone">
+
+  <head><title></title></head>
+  <body>
+    <hr>
+    <div id="portal-colophon" metal:define-macro="colophon" i18n:domain="plone">
+      <!--
+
+	Please keep the Plone Powered button (or a textual link to us) if you use
+	Plone on your site. It's a nice token of gratitude, and we appreciate your
+	help in promoting the Plone name.
+
+	Plone is powered by the combined forces of Zope and CMF, two absolutely
+	great systems made by Zope Corporation (http://zope.com) and they in turn
+	are based on the best programming language in the world - Python
+	(http://www.python.org). We owe these guys a lot, thanks for making Plone
+	possible!
+
+      -->
+
+<!-- THESE LOGOS REPLACED WITH COOPERATIVE COFFEES LOGOS -->
+
+<!--  MOVED PLONE POWERED LOGO TO BOTTOM OF COLOPHON 
+      <metal:slot define-slot="colophon" />
+
+      <p i18n:translate="text_conforms_to_standards" class="discreet">
+	This site conforms to the following standards:
+      </p>
+
+      <ul>
+	<li>
+	  <a href="http://www.section508.gov">
+	    <img src=""
+		 height="15"
+		 width="80"
+		 alt="Section 508"
+		 title="This Plone site conforms to the US Government Section 508 Accessibility Guidelines."
+		 tal:attributes="src string:$portal_url/colophon_sec508.gif"
+		 i18n:attributes="alt title" />
+	  </a>
+	</li>
+	
+       <li>
+	  <a href="http://www.w3.org/WAI/WCAG1AA-Conformance"
+	     title="Explanation of WCAG Conformance"
+	     i18n:attributes="title">
+	    <img src=""
+		 height="15"
+		 width="80"
+		 alt="WCAG"
+		 title="This Plone site conforms to the W3C-WAI Web Content Accessibility Guidelines."
+		 tal:attributes="src string:$portal_url/colophon_wai-aa.gif"
+		 i18n:attributes="alt title" />
+	  </a>
+	</li>
+	<li>
+	  <a href="http://validator.w3.org/check/referer">
+	    <img src=""
+		 height="15"
+		 width="80"
+		 alt="Valid XHTML"
+		 title="This Plone site is valid XHTML."
+		 tal:attributes="src string:$portal_url/colophon_xhtml.png"
+		 i18n:attributes="alt title" />
+	  </a>
+	</li>
+	<li>
+	  <a href="http://jigsaw.w3.org/css-validator/check/referer">
+	    <img src=""
+		 height="15"
+		 width="80"
+		 alt="Valid CSS"
+		 title="This Plone site was built with valid CSS."
+		 tal:attributes="src string:$portal_url/colophon_css.png"
+		 i18n:attributes="alt title" />
+	  </a>
+	</li>
+	<li>
+	  <a href="http://plone.org/browsersupport">
+	    <img src=""
+		 height="15"
+		 width="80"
+		 alt="Usable in any browser"
+		 title="This Plone site is usable in any web browser."
+		 tal:attributes="src string:$portal_url/colophon_anybrowser.png"
+		 i18n:attributes="alt title" />
+	  </a>
+	</li>  
+      </ul>  --><!-- END ORIGINAL LOGOS  -->
+
+     <div id="footer_nav" align="center">
+       <ul>
+              <li tal:repeat="cfg_lines python: [ s for s in context.config_links_footer.Description().split('\n') if len(s.strip()) > 0 and s.strip()[0] != '#' and s.count('|') == 1 ] [:6]">
+
+                   <a tal:condition="python: cfg_lines.split('|')[1].strip()[:4] != 'http'"
+                      tal:attributes="href python: str(here.REQUEST.BASE0) + cfg_lines.split('|')[1].strip()"
+                      tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+                   <a tal:condition="python: cfg_lines.split('|')[1].strip()[:4] == 'http'"
+                      tal:attributes="href python: cfg_lines.split('|')[1].strip()"
+                      tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+              </li>
+                
+              <br />
+
+              <li tal:repeat="cfg_lines python: [ s for s in context.config_links_footer.Description().split('\n') if len(s.strip()) > 0 and s.strip()[0] != '#' and s.count('|') == 1 ] [6:]">
+
+                   <a tal:condition="python: cfg_lines.split('|')[1].strip()[:4] != 'http'"
+                      tal:attributes="href python: str(here.REQUEST.BASE0) + cfg_lines.split('|')[1].strip()"
+                      tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+                   <a tal:condition="python: cfg_lines.split('|')[1].strip()[:4] == 'http'"
+                      tal:attributes="href python: cfg_lines.split('|')[1].strip()"
+                      tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+              </li>
+<!--
+         <li>
+           <a tal:attributes="href python: str(here.REQUEST.BASE2)">HOME</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/who'%str(here.REQUEST.BASE2)">WHO WE ARE</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/what'%str(here.REQUEST.BASE2)">WHAT WE DO</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/resources'%str(here.REQUEST.BASE2)">RESOURCES</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/all_news'%str(here.REQUEST.BASE2)">ALL NEWS</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/what/producers'%str(here.REQUEST.BASE2)">FOR PRODUCERS</a>
+         </li>
+           <br>
+         <li>
+           <a tal:attributes="href python: '%s/resources/links'%str(here.REQUEST.BASE2)">LINKS</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/who/contact-us'%str(here.REQUEST.BASE2)">CONTACT US</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/sitemap'%str(here.REQUEST.BASE2)">SITE MAP</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/resources/frequently-asked-questions'%str(here.REQUEST.BASE2)">FAQ</a>
+         </li>
+         <li>
+           <a tal:attributes="href python: '%s/resources/carter-center-fair-trade-forum'%str(here.REQUEST.BASE2)">GALLERY</a>
+         </li>
+        -->
+       </ul>
+     </div>
+
+<!-- BEGIN NEW LOGOS SECTION -->
+
+
+
+
+
+     <div id="all_logos">
+     <div id="logos_left"> 
+       <ul tal:define="cfg_lines python: [ s.strip() for s in container.config_links_colophon.Description().split('\n') if len(s.strip()) > 0 and s.strip()[0] != '#' ]">
+    <li>
+
+	  <a tal:attributes="href python: [str(here.REQUEST.BASE0) + cfg_lines[0],cfg_lines[0]] [cfg_lines[0].strip()[:4] == 'http']">
+	    <a href="http://www.wfto.com/" target="blank"><img src="http://coopcoffees.com/logos/WFTO_small.jpg/" align="bottom" 
+		 alt="logo WFTO footer" /></a>
+	  </a>
+
+	</li>
+        <li>
+	  <a tal:attributes="href python: [str(here.REQUEST.BASE0) + cfg_lines[1],cfg_lines[1]] [cfg_lines[1].strip()[:4] == 'http']">
+	    <a href="http://www.transfairusa.org/" target="blank"><img src="logo_FTC.jpg"
+		 height="85"
+		 width="62"
+		 alt="Fair Trade Certified" /></a>
+	  </a>
+	</li>
+        <li>
+	  <a tal:attributes="href python: [str(here.REQUEST.BASE0) + cfg_lines[2],cfg_lines[2]] [cfg_lines[2].strip()[:4] == 'http']">
+	    <a href="http://www.fairtradefederation.org/" target="blank"><img src="logo_FTF.jpg"
+		 height="85"
+		 width="62"
+		 alt="Fair Trade Federation Member" /></a>
+	  </a>
+	</li>        
+       </ul>
+     </div>
+     
+     <div id="logos_center">
+        <a href="http://plone.org" target="blank">
+	  <img src=""
+	       height="15"
+	       width="80"
+	       alt="Powered by Plone"
+	       title="This Plone site was built using the Plone Content Management System. Click for more information."
+	       tal:attributes="src string:$portal_url/plone_powered.gif"
+	       i18n:attributes="alt title" />
+         </a>   
+     </div>
+
+     <div id="logos_right">
+      <ul tal:define="cfg_lines python: [ s.strip() for s in container.config_links_colophon.Description().split('\n') if len(s.strip()) > 0 and s.strip()[0] != '#' ]">
+	<li>
+	  <a tal:attributes="href python: [str(here.REQUEST.BASE0) + cfg_lines[3],cfg_lines[3]] [cfg_lines[3].strip()[:4] == 'http']">
+	    <a href="http://www.scaa.org/" target="blank"><img src="logo_SCAA.jpg"
+		 height="85"
+		 width="80"
+		 alt="Specialty Coffee Association of America" /></a>
+	  </a>
+	</li>
+        <li>
+	  <a tal:attributes="href python: [str(here.REQUEST.BASE0) + cfg_lines[4],cfg_lines[4]] [cfg_lines[4].strip()[:4] == 'http']">
+	    <a href="http://www.usda.gov" target="blank"><img src="logo_ORGANIC.jpg"
+		 height="85" 
+		 width="62"
+		 alt="USDA Organic" /></a>
+	  </a>
+	</li>
+        <li>
+	  <a tal:attributes="href python: [str(here.REQUEST.BASE0) + cfg_lines[5],cfg_lines[5]] [cfg_lines[5].strip()[:4] == 'http']">
+	    <a href="http://qcsinfo.org/" target="blank"><img src="logo_QCS"
+		 alt="Quality Certification Service" /></a>
+	  </a>
+	</li>        
+       </ul>
+     </div>
+     </div>
+
+      
+    </div>
+
+  </body>
+</html>

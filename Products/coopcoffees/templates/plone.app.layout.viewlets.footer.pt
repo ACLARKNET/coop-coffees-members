@@ -1,0 +1,5 @@
+<div id="portal-footer" metal:define-macro="portal_footer" i18n:domain="plone">
+
+    <div style="width: 100%">Copyright ©2006-2010 Cooperative Coffees</div>
+
+</div>

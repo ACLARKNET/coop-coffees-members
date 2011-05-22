@@ -1,0 +1,24 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup">
+
+    <genericsetup:registerProfile
+        name="default"
+        title="Products.coopcoffees"
+        directory="profiles/default"
+        description="Coop Coffees Theme"
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
+
+    <!-- File System Directory Views registration -->
+    <cmf:registerDirectory name="coopcoffees"/>
+
+    <include package="z3c.jbot" file="meta.zcml" />
+    <browser:templateOverrides
+      directory="templates" />
+
+</configure>
+

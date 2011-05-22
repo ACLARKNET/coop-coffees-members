@@ -1,0 +1,125 @@
+<div id="portal-colophon" metal:define-macro="colophon" i18n:domain="plone">
+
+      <metal:slot define-slot="colophon" />
+
+     <div id="footer_nav" align="center">
+       <ul>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url())"  href="http://coopcoffees.com/">HOME</a>
+
+                   
+              </li>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/who'"  href="http://coopcoffees.com/who">WHO WE ARE</a>
+                   
+              </li>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/what'" href="http://coopcoffees.com/what">WHAT WE DO</a>
+                   
+              </li>
+
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/resources'" href="http://coopcoffees.com/resources">RESOURCES</a>
+                   
+              </li>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/all_news'" href="http://coopcoffees.com/all_news">ALL NEWS</a>
+                   
+              </li>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/for-partners'" href="http://coopcoffees.com/for-partners">FOR PARTNERS</a>
+                   
+              </li>
+                
+              <br>
+
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/links'" href="http://coopcoffees.com/resources/links">WEB LINKS</a>
+                   
+              </li>
+
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/contact-us'" href="http://coopcoffees.com/who/contact-us">CONTACT US</a>
+                   
+              </li>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/site-map'" href="http://coopcoffees.com/site-map">SITE MAP</a>
+                   
+              </li>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/resources/basics/frequently-asked-questions'" href="http://coopcoffees.com/resources/basics/frequently-asked-questions">FAQ</a>
+                   
+              </li>
+              <li>
+
+                   <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/images'" href="http://coopcoffees.com/images">PHOTO GALLERY</a>
+                   
+              </li>
+       </ul>
+
+     </div>
+
+     <div id="all_logos">
+     <div id="logos_left"> 
+       <ul>
+    <li>
+
+      <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/who/memberships'" href="http://coopcoffees.com/who/memberships">
+        </a><a href="http://www.wfto.com/" target="blank"><img src="http://coopcoffees.com/logos/WFTO_small.jpg/" alt="logo WFTO footer" align="bottom"></a>
+      
+
+    </li>
+        <li>
+      <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/who/memberships'" href="http://coopcoffees.com/who/memberships">
+        </a><a href="http://www.transfairusa.org/" target="blank"><img src="logo_FTC.jpg" alt="Fair Trade Certified" height="85" width="62"></a>
+      
+    </li>
+        <li>
+      <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/who/memberships'" href="http://coopcoffees.com/who/memberships">
+
+        </a><a href="http://www.fairtradefederation.org/" target="blank"><img src="logo_FTF.jpg" alt="Fair Trade Federation Member" height="85" width="62"></a>
+      
+    </li>        
+       </ul>
+     </div>
+     
+     <div id="logos_center">
+        <a href="http://plone.org" target="blank">
+      <img src="http://coopcoffees.com/plone_powered.gif" alt="Powered by Plone" title="This Plone site was built using the Plone Content Management System. Click for more information." height="15" width="80">
+         </a>   
+     </div>
+
+     <div id="logos_right">
+      <ul>
+    <li>
+      <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/who/memberships'" href="http://coopcoffees.com/who/memberships">
+        </a><a href="http://www.scaa.org/" target="blank"><img src="logo_SCAA.jpg" alt="Specialty Coffee Association of America" height="85" width="80"></a>
+      
+    </li>
+        <li>
+      <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/who/memberships'" href="http://coopcoffees.com/who/memberships">
+        </a><a href="http://www.usda.gov" target="blank"><img src="logo_ORGANIC.jpg" alt="USDA Organic" height="85" width="62"></a>
+
+      
+    </li>
+        <li>
+      <a tal:attributes="href python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/who/memberships'" href="http://coopcoffees.com/who/memberships">
+        </a><a href="http://www.oregontilth.org" target="blank"><img tal:attributes="src python: str(context.restrictedTraverse('@@plone_portal_state').portal_url()) + '/oregon_tilth_logo.jpg'" src="http://www.coopcoffees.com/portal_skins/custom/oregon_tilth_logo.jpg" alt="Oregon Tilth" width="80" height="85"></a>
+      
+    </li>        
+       </ul>
+     </div>
+     </div>
+
+      
+    </div>

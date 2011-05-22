@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<portlets>
+ <assignment name="portlet_dynamic" category="context" key="/"
+    manager="plone.leftcolumn" type="portlets.Classic">
+  <property name="macro">portlet</property>
+  <property name="template">portlet_dynamic</property>
+ </assignment>
+ <assignment name="portlet_membersonly" category="context" key="/"
+    manager="plone.leftcolumn" type="portlets.Classic">
+  <property name="macro">portlet</property>
+  <property name="template">portlet_membersonly</property>
+ </assignment>
+ <assignment name="portlet_hotlinks" category="context" key="/"
+    manager="plone.leftcolumn" type="portlets.Classic">
+  <property name="macro">portlet</property>
+  <property name="template">portlet_hotlinks</property>
+ </assignment>
+ <assignment name="label_log_in" category="context" key="/"
+    manager="plone.leftcolumn" type="portlets.Login"/>
+ <assignment name="search" category="context" key="/"
+    manager="plone.leftcolumn" type="portlets.Search">
+  <property name="enableLivesearch">True</property>
+ </assignment>
+</portlets>

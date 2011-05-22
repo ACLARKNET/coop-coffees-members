@@ -1,0 +1,52 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+<body>
+<div metal:define-macro="portlet"
+       tal:omit-tag=""
+       tal:condition="not: python: context.restrictedTraverse('@@plone_portal_state').anonymous()">
+
+<tal:comment replace="nothing">
+
+    <!--- XXX Fix me -->
+
+         tal:condition="python: (here.portlet_dynamic.anon_see and isAnon) or (here.portlet_dynamic.auth_see and not isAnon)"
+
+</tal:comment>
+
+     <div class="portlet" id="portlet_navigation">
+    <div class="portletHeader">
+        <a>Members Only</a>
+    </div>
+
+
+
+        <div class="portletBody">
+          <div class="portletContent odd">
+
+            <ul>
+              <li tal:repeat="cfg_lines python: [ s for s in context.config_links_membersonly.Description().split('\n') if len(s.strip()) > 0 and s.strip()[0] != '#' and s.count('|') == 1 ]">
+
+                   <span tal:condition="python: cfg_lines.split('|')[1].strip()[:4] != 'http'" tal:omit-tag="">
+                      <img src="bean_bullet.gif" /> 
+                      <a tal:attributes="href python: str(here.REQUEST.BASE0) + cfg_lines.split('|')[1].strip()" accesskey="n" title=""
+                         tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+                   </span>
+                   <span tal:condition="python: cfg_lines.split('|')[1].strip()[:4] == 'http'" tal:omit-tag="">
+                      <img src="bean_bullet.gif" />
+                      <a tal:attributes="href python: cfg_lines.split('|')[1].strip()" accesskey="n" title=""
+                         tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+                    </span>
+
+              </li>
+            </ul>
+<!-- THE ABOVE HREF WILL HAVE TO BE TWEAKED WHEN THE SITE GETS MOVED TO ITS FINAL LOCALE -->
+
+          </div>
+
+        </div>
+     </div>
+
+</div>
+</body>
+</html>

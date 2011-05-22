@@ -1,0 +1,37 @@
+
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+
+
+  <body>
+    <div metal:define-macro="portlet" tal:omit-tag=""
+         tal:condition="python: (here.portlet_hotlinks.anon_see and isAnon) or (here.portlet_hotlinks.auth_see and not isAnon)">
+      <div class="portlet" id="portlet_hotlinks">
+
+
+    <dt class="portletHeader">
+        <a>Hot Links</a>
+    </dt>
+
+
+        <div class="portletBody">
+          <div class="portletContent odd">
+            <ul>
+              <li><a href=""><span class="">Web Links</span></a></li>
+              <li><a href=""><span class="">Contact Us</span></a></li>
+              <li><a href="sitemap"><span class="">Sitemap</span></a></li>
+              <li><a href=""><span class="">FAQS</span></a></li>
+              <li><a href=""><span class="">Photo Gallery</span></a></li> 
+              
+            </ul>
+          </div>
+        </div>
+
+    </div>
+  
+    </div>  
+  </body>
+
+</html>
+

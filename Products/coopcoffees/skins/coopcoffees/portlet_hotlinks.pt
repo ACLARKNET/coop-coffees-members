@@ -1,0 +1,37 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+
+  <body>
+    <div metal:define-macro="portlet" tal:omit-tag="">
+      <div class="portlet">
+
+        <div class="portletHeader">
+        <a>Hot Links</a></div>
+
+     <div class="portletBody">
+             <div class="portletContent odd">
+               <ul>
+              <li tal:repeat="cfg_lines python: [ s for s in context.config_links_hotlinks.Description().split('\n') if len(s.strip()) > 0 and s.strip()[0] != '#' and s.count('|') == 1 ]">
+
+                   <span tal:condition="python: cfg_lines.split('|')[1].strip()[:4] != 'http'" tal:omit-tag="">
+                      <img src="bean_bullet.gif" /> 
+                      <a tal:attributes="href python: str(here.REQUEST.BASE0) + cfg_lines.split('|')[1].strip()" accesskey="n" title=""
+                         tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+                   </span>
+                   <span tal:condition="python: cfg_lines.split('|')[1].strip()[:4] == 'http'" tal:omit-tag="">
+                      <img src="bean_bullet.gif" />
+                      <a tal:attributes="href python: cfg_lines.split('|')[1].strip()" accesskey="n" title=""
+                         tal:content="python: cfg_lines.split('|')[0].strip()"></a>
+                    </span>
+
+              </li>
+               </ul>
+            </div>      
+       </div>
+     </div>
+    </div>  
+    
+  </body>
+</html>
+ 

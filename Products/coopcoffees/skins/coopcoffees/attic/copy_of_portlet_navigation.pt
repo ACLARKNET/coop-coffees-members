@@ -1,0 +1,141 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+<body>
+<div metal:define-macro="portlet"
+       i18n:domain="plone"
+       tal:omit-tag=""
+       tal:define="data python:here.plone_utils.createNavTree(here, sitemap=None);"
+       tal:condition="python: (here.portlet_navigation.anon_see and isAnon) or (here.portlet_navigation.auth_see and not isAnon)">
+       
+    <dt class="portletHeader">
+        <a href="#" tal:attributes="href string:$portal_url/sitemap" i18n:translate="box_navigation">Navigation</a>
+    </dt>
+<!--
+            <div class="portletBody">
+          <div class="portletContent odd">
+
+        <ul>
+
+            <li tal:condition="portal_properties/navtree_properties/includeTop">
+                    <a tal:attributes="href string:$portal_url;
+                                       title portal/Description;">
+                    <span class="">Home</span>
+                    </a>
+            </li>  
+            <li tal:replace="structure python:here.portlet_navtree_macro(children=data.get('children', []), level=1, show_children=True, isNaviTree=True)">
+                SUBTREE
+            </li>
+        </ul>
+-->
+
+
+
+
+
+
+<div tal:define="selected_tabs python:here.selectedTabs('index_html', here, portal_tabs);
+                 selected_portal_tab selected_tabs/portal;"
+     tal:condition="portal_tabs">  
+ <!--   <h5 class="hiddenStructure" i18n:translate="heading_sections">Sections</h5>
+
+
+<div metal:define-macro="portal_tabs"
+     tal:omit-tag=""
+     tal:define="selected_tabs python:here.selectedTabs('index_html', here, portal_tabs);
+                 selected_portal_tab selected_tabs/portal;"
+     tal:condition="portal_tabs">  
+    <h5 class="hiddenStructure" i18n:translate="heading_sections">Sections</h5>
+-->
+
+        <div class="portletBody">
+          <div class="portletContent odd">
+    <ul>
+        <li tal:repeat="tab portal_tabs">
+            <a href="" 
+               tal:content="tab/name"
+               tal:attributes="href tab/url;
+                               title tab/description|nothing">
+            <span class="">Tab Name</span>
+            </a>
+        </li>
+    </ul>
+
+
+
+</div>
+
+
+ 
+<!--
+    <ul>
+        <tal:tabs tal:repeat="tab portal_tabs"><li tal:attributes="id string:portaltab-${tab/id};
+                            class python:test(selected_portal_tab==tab['id'], 'selected', 'plain');">
+            <a href="" 
+               tal:content="tab/name"
+               tal:attributes="href tab/url;
+                               title tab/description|nothing">
+            Tab Name
+            </a></li></tal:tabs>
+    </ul>
+</div> -->
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+</div>
+
+</div>
+</body>
+</html>
+
+<!--
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+<body>
+<div metal:define-macro="portlet"
+       i18n:domain="plone"
+       tal:omit-tag=""
+       tal:define="data python:here.plone_utils.createNavTree(here, sitemap=None);"
+       tal:condition="python: (here.portlet_navigation.anon_see and isAnon) or (here.portlet_navigation.auth_see and not isAnon)">
+       
+<dl class="portlet" id="portlet-navigation-tree">
+    <dt class="portletHeader">
+        <a href="#" tal:attributes="href string:$portal_url/sitemap" i18n:translate="box_navigation">Navigation</a>
+    </dt>
+    
+    <dd class="portletItemSingle">
+        <ul class="portletNavigationTree navTreeLevel0">
+
+            <li class="navTreeItem"
+                tal:condition="portal_properties/navtree_properties/includeTop">
+                <div class="contenttype-plone-site">
+                    <a class="visualIconPadding"
+                       tal:attributes="href string:$portal_url;
+                                       title portal/Description;
+                                       class python:test(portal == here or (portal == here.getParentNode() and here.plone_utils.isDefaultPage(here)), 'navTreeCurrentItem visualIconPadding', 'visualIconPadding');">
+                    <span tal:omit-tag=""
+                          i18n:translate="tabs_home">Home</span>
+                    </a>
+                </div>
+            </li>
+            <li tal:replace="structure python:here.portlet_navtree_macro(children=data.get('children', []), level=1, show_children=True, isNaviTree=True)">
+                SUBTREE
+            </li>
+        </ul>
+    </dd>
+</dl>
+
+</div>
+</body>
+</html>
+ -->

@@ -1,0 +1,26 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="plone">
+
+  <body>
+    <div metal:define-macro="portlet" tal:omit-tag=""
+       tal:condition="python: (here.portlet_visit_farmers.anon_see and isAnon) or (here.portlet_visit_farmers.auth_see and not isAnon)">
+      <div class="portlet">
+
+    <div class="portletHeader">
+        <a>Visit Farmers</a>
+    </div>
+
+        <div class="portletBody">
+
+         <a href="/what/producers"><img src="coffee3.jpg"></a>
+           
+        </div>
+
+    </div>
+  
+    </div>  
+    
+  </body>
+</html>
+ 

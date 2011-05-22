@@ -1,0 +1,40 @@
+
+server {
+    listen 80;
+    server_name ${hosts:production1} www.${hosts:production1};
+    location / {
+        proxy_pass http://${hosts:localhost}:${ports:varnish}/VirtualHostBase/http/${hosts:production1}:${ports:nginx}/${misc:site}/VirtualHostRoot/;
+    }
+    client_max_body_size 10M;
+}
+
+server {
+    listen 80;
+    server_name ${hosts:production2} www.${hosts:production2}; 
+    location / {
+        proxy_pass http://${hosts:localhost}:${ports:varnish}/VirtualHostBase/http/${hosts:production2}:${ports:nginx}/${misc:site}/VirtualHostRoot/;
+    }
+    client_max_body_size 10M;
+}
+
+server {
+    listen 80;
+    server_name coopcoffees.aclark.net;
+    location / {
+        proxy_pass http://localhost:9080/VirtualHostBase/http/coopcoffees.aclark.net/coopcoffees/VirtualHostRoot/;
+        proxy_set_header Host $host;
+        proxy_set_header X-XDV "true";
+        xslt_stylesheet /srv/new/etc/theme.xsl;
+        xslt_html_parser on;
+        xslt_types text/html;
+    }
+
+    root /srv/new;
+
+    location /static/ {
+        autoindex on;
+    }
+
+    client_max_body_size 10M;
+}
+

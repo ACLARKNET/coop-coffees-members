@@ -1,0 +1,46 @@
+<!-- Page Template Diagnostics
+ Compilation failed
+ zope.tal.taldefs.TALError: illegal i18n:attributes specification: u'alt accesskey title', at line 19, column 34
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+      i18n:domain="plone">
+
+<body>
+   
+<!-- THE SEARCHBOX DEFINITION -->
+<div class="heading_box">
+<div id="portal-searchbox" metal:define-macro="quick_search">   
+   <form name="searchform"
+          action="search"
+          tal:attributes="action string:${portal_url}/search" >
+       
+      <label for="searchGadget" class="hiddenStructure" i18n:translate="text_search">Search</label>       
+           <div class="portletHeader">
+          <h5>Search</h5>
+        </div>   
+           
+
+        <div id="search_spacing"><input id="searchGadget"
+               name="SearchableText"
+               type="text"
+               size="8"
+               value=""
+               alt="Search"
+               title="Search"
+               accesskey="accesskeys-search"
+               i18n:attributes="alt accesskey title"
+               tal:attributes="value request/SearchableText|nothing;
+                               tabindex tabindex/next" class="visibility:visible" />
+        <input class="searchButton"
+               type="submit"
+               value="go"
+           accesskey="accesskeys-search"
+           tal:attributes="tabindex tabindex/next"
+               i18n:attributes="value accesskey" />
+        </div>
+    </form>
+ </div>
+</div> 
+</body>
+</html>
+
