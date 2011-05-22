@@ -2,7 +2,7 @@
 
 import sys
 sys.path[0:0] = [
-    '/Users/aclark/Downloads/eggs-directory/distribute-0.6.15-py2.4.egg',
+    '/Users/aclark/Downloads/eggs-directory/distribute-0.6.16-py2.4.egg',
     '/Users/aclark/Downloads/eggs-directory/zc.buildout-1.5.2-py2.4.egg',
     ]
 
