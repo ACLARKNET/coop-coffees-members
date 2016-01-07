@@ -1,382 +1,277 @@
-#!python
-"""Bootstrap setuptools installation
+##############################################################################
+#
+# Copyright (c) 2006 Zope Foundation and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+"""Bootstrap a buildout-based project
 
-If you want to use setuptools in your package's setup.py, just include this
-file in the same directory with it, and add this to the top of your setup.py::
-
-    from ez_setup import use_setuptools
-    use_setuptools()
-
-If you want to require a specific version of setuptools, set a download
-mirror, or use an alternate download directory, you can do so by supplying
-the appropriate options to ``use_setuptools()``.
-
-This file can also be run as a script to install or upgrade setuptools.
+Simply run this script in a directory containing a buildout.cfg.
+The script accepts buildout command-line options, so you can
+use the -c option to specify an alternate configuration file.
 """
-import os
-import shutil
-import sys
-import tempfile
-import tarfile
-import optparse
-import subprocess
-import platform
 
-from distutils import log
+import os, shutil, sys, tempfile, urllib, urllib2, subprocess
+from optparse import OptionParser
+
+if sys.platform == 'win32':
+    def quote(c):
+        if ' ' in c:
+            return '"%s"' % c  # work around spawn lamosity on windows
+        else:
+            return c
+else:
+    quote = str
+
+# See zc.buildout.easy_install._has_broken_dash_S for motivation and comments.
+stdout, stderr = subprocess.Popen(
+    [sys.executable, '-Sc',
+     'try:\n'
+     '    import ConfigParser\n'
+     'except ImportError:\n'
+     '    print 1\n'
+     'else:\n'
+     '    print 0\n'],
+    stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+has_broken_dash_S = bool(int(stdout.strip()))
+
+# In order to be more robust in the face of system Pythons, we want to
+# run without site-packages loaded.  This is somewhat tricky, in
+# particular because Python 2.6's distutils imports site, so starting
+# with the -S flag is not sufficient.  However, we'll start with that:
+if not has_broken_dash_S and 'site' in sys.modules:
+    # We will restart with python -S.
+    args = sys.argv[:]
+    args[0:0] = [sys.executable, '-S']
+    args = map(quote, args)
+    os.execv(sys.executable, args)
+# Now we are running with -S.  We'll get the clean sys.path, import site
+# because distutils will do it later, and then reset the path and clean
+# out any namespace packages from site-packages that might have been
+# loaded by .pth files.
+clean_path = sys.path[:]
+import site  # imported because of its side effects
+sys.path[:] = clean_path
+for k, v in sys.modules.items():
+    if k in ('setuptools', 'pkg_resources') or (
+        hasattr(v, '__path__') and
+        len(v.__path__) == 1 and
+        not os.path.exists(os.path.join(v.__path__[0], '__init__.py'))):
+        # This is a namespace package.  Remove it.
+        sys.modules.pop(k)
+
+is_jython = sys.platform.startswith('java')
+
+setuptools_source = 'http://peak.telecommunity.com/dist/ez_setup.py'
+distribute_source = 'http://python-distribute.org/distribute_setup.py'
+distribute_source = 'https://bitbucket.org/pypa/setuptools/raw/f657df1f1ed46596d236376649c99a470662b4ba/distribute_setup.py'
+
+# parsing arguments
+def normalize_to_url(option, opt_str, value, parser):
+    if value:
+        if '://' not in value:  # It doesn't smell like a URL.
+            value = 'file://%s' % (
+                urllib.pathname2url(
+                    os.path.abspath(os.path.expanduser(value))),)
+        if opt_str == '--download-base' and not value.endswith('/'):
+            # Download base needs a trailing slash to make the world happy.
+            value += '/'
+    else:
+        value = None
+    name = opt_str[2:].replace('-', '_')
+    setattr(parser.values, name, value)
+
+usage = '''\
+[DESIRED PYTHON FOR BUILDOUT] bootstrap.py [options]
+
+Bootstraps a buildout-based project.
+
+Simply run this script in a directory containing a buildout.cfg, using the
+Python that you want bin/buildout to use.
+
+Note that by using --setup-source and --download-base to point to
+local resources, you can keep this script from going over the network.
+'''
+
+parser = OptionParser(usage=usage)
+parser.add_option("-v", "--version", dest="version",
+                          help="use a specific zc.buildout version")
+parser.add_option("-d", "--distribute",
+                   action="store_true", dest="use_distribute", default=False,
+                   help="Use Distribute rather than Setuptools.")
+parser.add_option("--setup-source", action="callback", dest="setup_source",
+                  callback=normalize_to_url, nargs=1, type="string",
+                  help=("Specify a URL or file location for the setup file. "
+                        "If you use Setuptools, this will default to " +
+                        setuptools_source + "; if you use Distribute, this "
+                        "will default to " + distribute_source + "."))
+parser.add_option("--download-base", action="callback", dest="download_base",
+                  callback=normalize_to_url, nargs=1, type="string",
+                  help=("Specify a URL or directory for downloading "
+                        "zc.buildout and either Setuptools or Distribute. "
+                        "Defaults to PyPI."))
+parser.add_option("--eggs",
+                  help=("Specify a directory for storing eggs.  Defaults to "
+                        "a temporary directory that is deleted when the "
+                        "bootstrap script completes."))
+parser.add_option("-t", "--accept-buildout-test-releases",
+                  dest='accept_buildout_test_releases',
+                  action="store_true", default=False,
+                  help=("Normally, if you do not specify a --version, the "
+                        "bootstrap script and buildout gets the newest "
+                        "*final* versions of zc.buildout and its recipes and "
+                        "extensions for you.  If you use this flag, "
+                        "bootstrap and buildout will get the newest releases "
+                        "even if they are alphas or betas."))
+parser.add_option("-c", None, action="store", dest="config_file",
+                   help=("Specify the path to the buildout configuration "
+                         "file to be used."))
+
+options, args = parser.parse_args()
+
+if options.eggs:
+    eggs_dir = os.path.abspath(os.path.expanduser(options.eggs))
+else:
+    eggs_dir = tempfile.mkdtemp()
+
+if options.setup_source is None:
+    if options.use_distribute:
+        options.setup_source = distribute_source
+    else:
+        options.setup_source = setuptools_source
+
+if options.accept_buildout_test_releases:
+    args.insert(0, 'buildout:accept-buildout-test-releases=true')
 
 try:
-    from site import USER_SITE
+    import pkg_resources
+    import setuptools  # A flag.  Sometimes pkg_resources is installed alone.
+    if not hasattr(pkg_resources, '_distribute'):
+        raise ImportError
 except ImportError:
-    USER_SITE = None
-
-DEFAULT_VERSION = "1.4.2"
-DEFAULT_URL = "https://pypi.python.org/packages/source/s/setuptools/"
-
-def _python_cmd(*args):
-    args = (sys.executable,) + args
-    return subprocess.call(args) == 0
-
-def _check_call_py24(cmd, *args, **kwargs):
-    res = subprocess.call(cmd, *args, **kwargs)
-    class CalledProcessError(Exception):
-        pass
-    if not res == 0:
-        msg = "Command '%s' return non-zero exit status %d" % (cmd, res)
-        raise CalledProcessError(msg)
-vars(subprocess).setdefault('check_call', _check_call_py24)
-
-def _install(tarball, install_args=()):
-    # extracting the tarball
-    tmpdir = tempfile.mkdtemp()
-    log.warn('Extracting in %s', tmpdir)
-    old_wd = os.getcwd()
-    try:
-        os.chdir(tmpdir)
-        tar = tarfile.open(tarball)
-        _extractall(tar)
-        tar.close()
-
-        # going in the directory
-        subdir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
-        os.chdir(subdir)
-        log.warn('Now working in %s', subdir)
-
-        # installing
-        log.warn('Installing Setuptools')
-        if not _python_cmd('setup.py', 'install', *install_args):
-            log.warn('Something went wrong during the installation.')
-            log.warn('See the error message above.')
-            # exitcode will be 2
-            return 2
-    finally:
-        os.chdir(old_wd)
-        shutil.rmtree(tmpdir)
-
-
-def _build_egg(egg, tarball, to_dir):
-    # extracting the tarball
-    tmpdir = tempfile.mkdtemp()
-    log.warn('Extracting in %s', tmpdir)
-    old_wd = os.getcwd()
-    try:
-        os.chdir(tmpdir)
-        tar = tarfile.open(tarball)
-        _extractall(tar)
-        tar.close()
-
-        # going in the directory
-        subdir = os.path.join(tmpdir, os.listdir(tmpdir)[0])
-        os.chdir(subdir)
-        log.warn('Now working in %s', subdir)
-
-        # building an egg
-        log.warn('Building a Setuptools egg in %s', to_dir)
-        _python_cmd('setup.py', '-q', 'bdist_egg', '--dist-dir', to_dir)
-
-    finally:
-        os.chdir(old_wd)
-        shutil.rmtree(tmpdir)
-    # returning the result
-    log.warn(egg)
-    if not os.path.exists(egg):
-        raise IOError('Could not build the egg.')
-
-
-def _do_download(version, download_base, to_dir, download_delay):
-    egg = os.path.join(to_dir, 'setuptools-%s-py%d.%d.egg'
-                       % (version, sys.version_info[0], sys.version_info[1]))
-    if not os.path.exists(egg):
-        tarball = download_setuptools(version, download_base,
-                                      to_dir, download_delay)
-        _build_egg(egg, tarball, to_dir)
-    sys.path.insert(0, egg)
-
-    # Remove previously-imported pkg_resources if present (see
-    # https://bitbucket.org/pypa/setuptools/pull-request/7/ for details).
+    ez_code = urllib2.urlopen(
+        options.setup_source).read().replace('\r\n', '\n')
+    ez = {}
+    exec ez_code in ez
+    setup_args = dict(to_dir=eggs_dir, download_delay=0)
+    if options.download_base:
+        setup_args['download_base'] = options.download_base
+    if options.use_distribute:
+        setup_args['no_fake'] = True
+        if sys.version_info[:2] == (2, 4):
+            setup_args['version'] = '0.6.32'
+    ez['use_setuptools'](**setup_args)
     if 'pkg_resources' in sys.modules:
-        del sys.modules['pkg_resources']
+        reload(sys.modules['pkg_resources'])
+    import pkg_resources
+    # This does not (always?) update the default working set.  We will
+    # do it.
+    for path in sys.path:
+        if path not in pkg_resources.working_set.entries:
+            pkg_resources.working_set.add_entry(path)
 
-    import setuptools
-    setuptools.bootstrap_install_from = egg
+cmd = [quote(sys.executable),
+       '-c',
+       quote('from setuptools.command.easy_install import main; main()'),
+       '-mqNxd',
+       quote(eggs_dir)]
 
+if not has_broken_dash_S:
+    cmd.insert(1, '-S')
 
-def use_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
-                   to_dir=os.curdir, download_delay=15):
-    # making sure we use the absolute path
-    to_dir = os.path.abspath(to_dir)
-    was_imported = 'pkg_resources' in sys.modules or \
-        'setuptools' in sys.modules
-    try:
-        import pkg_resources
-    except ImportError:
-        return _do_download(version, download_base, to_dir, download_delay)
-    try:
-        pkg_resources.require("setuptools>=" + version)
-        return
-    except pkg_resources.VersionConflict:
-        e = sys.exc_info()[1]
-        if was_imported:
-            sys.stderr.write(
-            "The required version of setuptools (>=%s) is not available,\n"
-            "and can't be installed while this script is running. Please\n"
-            "install a more recent version first, using\n"
-            "'easy_install -U setuptools'."
-            "\n\n(Currently using %r)\n" % (version, e.args[0]))
-            sys.exit(2)
-        else:
-            del pkg_resources, sys.modules['pkg_resources']    # reload ok
-            return _do_download(version, download_base, to_dir,
-                                download_delay)
-    except pkg_resources.DistributionNotFound:
-        return _do_download(version, download_base, to_dir,
-                            download_delay)
+find_links = options.download_base
+if not find_links:
+    find_links = os.environ.get('bootstrap-testing-find-links')
+if not find_links and options.accept_buildout_test_releases:
+    find_links = 'http://downloads.buildout.org/'
+if find_links:
+    cmd.extend(['-f', quote(find_links)])
 
-def _clean_check(cmd, target):
-    """
-    Run the command to download target. If the command fails, clean up before
-    re-raising the error.
-    """
-    try:
-        subprocess.check_call(cmd)
-    except subprocess.CalledProcessError:
-        if os.access(target, os.F_OK):
-            os.unlink(target)
-        raise
+if options.use_distribute:
+    setup_requirement = 'distribute'
+else:
+    setup_requirement = 'setuptools'
+ws = pkg_resources.working_set
+setup_requirement_path = ws.find(
+    pkg_resources.Requirement.parse(setup_requirement)).location
+env = dict(
+    os.environ,
+    PYTHONPATH=setup_requirement_path)
 
-def download_file_powershell(url, target):
-    """
-    Download the file at url to target using Powershell (which will validate
-    trust). Raise an exception if the command cannot complete.
-    """
-    target = os.path.abspath(target)
-    cmd = [
-        'powershell',
-        '-Command',
-        "(new-object System.Net.WebClient).DownloadFile(%(url)r, %(target)r)" % vars(),
-    ]
-    _clean_check(cmd, target)
+requirement = 'zc.buildout'
+version = options.version
+if version is None and not options.accept_buildout_test_releases:
+    # Figure out the most recent final version of zc.buildout.
+    import setuptools.package_index
+    _final_parts = '*final-', '*final'
 
-def has_powershell():
-    if platform.system() != 'Windows':
-        return False
-    cmd = ['powershell', '-Command', 'echo test']
-    devnull = open(os.path.devnull, 'wb')
-    try:
-        try:
-            subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
-        except:
-            return False
-    finally:
-        devnull.close()
-    return True
+    def _final_version(parsed_version):
+        for part in parsed_version:
+            if (part[:1] == '*') and (part not in _final_parts):
+                return False
+        return True
+    index = setuptools.package_index.PackageIndex(
+        search_path=[setup_requirement_path])
+    if find_links:
+        index.add_find_links((find_links,))
+    req = pkg_resources.Requirement.parse(requirement)
+    if index.obtain(req) is not None:
+        best = []
+        bestv = None
+        for dist in index[req.project_name]:
+            distv = dist.parsed_version
+            if distv >= pkg_resources.parse_version('2dev'):
+                continue
+            if _final_version(distv):
+                if bestv is None or distv > bestv:
+                    best = [dist]
+                    bestv = distv
+                elif distv == bestv:
+                    best.append(dist)
+        if best:
+            best.sort()
+            version = best[-1].version
 
-download_file_powershell.viable = has_powershell
+if version:
+    requirement += '=='+version
+else:
+    requirement += '<2dev'
 
-def download_file_curl(url, target):
-    cmd = ['curl', url, '--silent', '--output', target]
-    _clean_check(cmd, target)
+cmd.append(requirement)
 
-def has_curl():
-    cmd = ['curl', '--version']
-    devnull = open(os.path.devnull, 'wb')
-    try:
-        try:
-            subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
-        except:
-            return False
-    finally:
-        devnull.close()
-    return True
+if is_jython:
+    import subprocess
+    exitcode = subprocess.Popen(cmd, env=env).wait()
+else:  # Windows prefers this, apparently; otherwise we would prefer subprocess
+    exitcode = os.spawnle(*([os.P_WAIT, sys.executable] + cmd + [env]))
+if exitcode != 0:
+    sys.stdout.flush()
+    sys.stderr.flush()
+    print ("An error occurred when trying to install zc.buildout. "
+           "Look above this message for any errors that "
+           "were output by easy_install.")
+    sys.exit(exitcode)
 
-download_file_curl.viable = has_curl
+ws.add_entry(eggs_dir)
+ws.require(requirement)
+import zc.buildout.buildout
 
-def download_file_wget(url, target):
-    cmd = ['wget', url, '--quiet', '--output-document', target]
-    _clean_check(cmd, target)
-
-def has_wget():
-    cmd = ['wget', '--version']
-    devnull = open(os.path.devnull, 'wb')
-    try:
-        try:
-            subprocess.check_call(cmd, stdout=devnull, stderr=devnull)
-        except:
-            return False
-    finally:
-        devnull.close()
-    return True
-
-download_file_wget.viable = has_wget
-
-def download_file_insecure(url, target):
-    """
-    Use Python to download the file, even though it cannot authenticate the
-    connection.
-    """
-    try:
-        from urllib.request import urlopen
-    except ImportError:
-        from urllib2 import urlopen
-    src = dst = None
-    try:
-        src = urlopen(url)
-        # Read/write all in one block, so we don't create a corrupt file
-        # if the download is interrupted.
-        data = src.read()
-        dst = open(target, "wb")
-        dst.write(data)
-    finally:
-        if src:
-            src.close()
-        if dst:
-            dst.close()
-
-download_file_insecure.viable = lambda: True
-
-def get_best_downloader():
-    downloaders = [
-        download_file_powershell,
-        download_file_curl,
-        download_file_wget,
-        download_file_insecure,
-    ]
-
-    for dl in downloaders:
-        if dl.viable():
-            return dl
-
-def download_setuptools(version=DEFAULT_VERSION, download_base=DEFAULT_URL,
-                        to_dir=os.curdir, delay=15,
-                        downloader_factory=get_best_downloader):
-    """Download setuptools from a specified location and return its filename
-
-    `version` should be a valid setuptools version number that is available
-    as an egg for download under the `download_base` URL (which should end
-    with a '/'). `to_dir` is the directory where the egg will be downloaded.
-    `delay` is the number of seconds to pause before an actual download
-    attempt.
-
-    ``downloader_factory`` should be a function taking no arguments and
-    returning a function for downloading a URL to a target.
-    """
-    # making sure we use the absolute path
-    to_dir = os.path.abspath(to_dir)
-    tgz_name = "setuptools-%s.tar.gz" % version
-    url = download_base + tgz_name
-    saveto = os.path.join(to_dir, tgz_name)
-    if not os.path.exists(saveto):  # Avoid repeated downloads
-        log.warn("Downloading %s", url)
-        downloader = downloader_factory()
-        downloader(url, saveto)
-    return os.path.realpath(saveto)
+# If there isn't already a command in the args, add bootstrap
+if not [a for a in args if '=' not in a]:
+    args.append('bootstrap')
 
 
-def _extractall(self, path=".", members=None):
-    """Extract all members from the archive to the current working
-       directory and set owner, modification time and permissions on
-       directories afterwards. `path' specifies a different directory
-       to extract to. `members' is optional and must be a subset of the
-       list returned by getmembers().
-    """
-    import copy
-    import operator
-    from tarfile import ExtractError
-    directories = []
+# if -c was provided, we push it back into args for buildout's main function
+if options.config_file is not None:
+    args[0:0] = ['-c', options.config_file]
 
-    if members is None:
-        members = self
-
-    for tarinfo in members:
-        if tarinfo.isdir():
-            # Extract directories with a safe mode.
-            directories.append(tarinfo)
-            tarinfo = copy.copy(tarinfo)
-            tarinfo.mode = 448  # decimal for oct 0700
-        self.extract(tarinfo, path)
-
-    # Reverse sort directories.
-    if sys.version_info < (2, 4):
-        def sorter(dir1, dir2):
-            return cmp(dir1.name, dir2.name)
-        directories.sort(sorter)
-        directories.reverse()
-    else:
-        directories.sort(key=operator.attrgetter('name'), reverse=True)
-
-    # Set correct owner, mtime and filemode on directories.
-    for tarinfo in directories:
-        dirpath = os.path.join(path, tarinfo.name)
-        try:
-            self.chown(tarinfo, dirpath)
-            self.utime(tarinfo, dirpath)
-            self.chmod(tarinfo, dirpath)
-        except ExtractError:
-            e = sys.exc_info()[1]
-            if self.errorlevel > 1:
-                raise
-            else:
-                self._dbg(1, "tarfile: %s" % e)
-
-
-def _build_install_args(options):
-    """
-    Build the arguments to 'python setup.py install' on the setuptools package
-    """
-    install_args = []
-    if options.user_install:
-        if sys.version_info < (2, 6):
-            log.warn("--user requires Python 2.6 or later")
-            raise SystemExit(1)
-        install_args.append('--user')
-    return install_args
-
-def _parse_args():
-    """
-    Parse the command line for options
-    """
-    parser = optparse.OptionParser()
-    parser.add_option(
-        '--user', dest='user_install', action='store_true', default=False,
-        help='install in user site package (requires Python 2.6 or later)')
-    parser.add_option(
-        '--download-base', dest='download_base', metavar="URL",
-        default=DEFAULT_URL,
-        help='alternative URL from where to download the setuptools package')
-    parser.add_option(
-        '--insecure', dest='downloader_factory', action='store_const',
-        const=lambda: download_file_insecure, default=get_best_downloader,
-        help='Use internal, non-validating downloader'
-    )
-    options, args = parser.parse_args()
-    # positional arguments are ignored
-    return options
-
-def main(version=DEFAULT_VERSION):
-    """Install or upgrade setuptools and EasyInstall"""
-    options = _parse_args()
-    tarball = download_setuptools(download_base=options.download_base,
-        downloader_factory=options.downloader_factory)
-    return _install(tarball, _build_install_args(options))
-
-if __name__ == '__main__':
-    sys.exit(main())
+zc.buildout.buildout.main(args)
+if not options.eggs:  # clean up temporary egg directory
+    shutil.rmtree(eggs_dir)
