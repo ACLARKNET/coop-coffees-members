@@ -26,3 +26,5 @@ Ubuntu
         libfreetype6-dev liblcms2-dev libwebp-dev libssl-dev libxml2-dev  \
         libxslt1-dev libbz2-dev nginx openssl python-dev tcl8.6-dev       \
         tk8.6-dev zlib1g-dev 
+    sudo aptitude update
+    sudo aptitude upgrade
