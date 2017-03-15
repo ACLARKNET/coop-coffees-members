@@ -30,6 +30,7 @@ Plone + Python
 For SSL support, add ``/usr/lib/x86_64-linux-gnu`` to line 271 of ``setup.py``.
 
 ::
+
     ./configure
     make
     sudo make install
@@ -37,6 +38,9 @@ For SSL support, add ``/usr/lib/x86_64-linux-gnu`` to line 271 of ``setup.py``.
 
 NGINX
 -----
+
+/etc/nginx/sites-enabled/default
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
