@@ -14,7 +14,7 @@ Ubuntu
         libxslt1-dev libbz2-dev nginx openssl python-dev tcl8.6-dev       \
         tk8.6-dev zlib1g-dev -y
     sudo aptitude update
-    sudo aptitude upgrade
+    sudo aptitude upgrade -y
 
 Plone + Python
 --------------
